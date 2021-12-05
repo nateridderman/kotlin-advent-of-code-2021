@@ -1,38 +1,42 @@
-import java.lang.RuntimeException
-
 fun main() {
     fun part1(input: List<String>): Int {
-        var forwardProgress = 0
-        var depth = 0
-        input.map { it.split(" ") }
-            .map {
-                when (it[0]) {
-                    "forward" -> forwardProgress += it[1].toInt()
-                    "down" -> depth += it[1].toInt()
-                    "up" -> depth -= it[1].toInt()
-                    else -> RuntimeException()
+        val reportsSize = input.size
+        val numOfPositions = input[0].length
+        var sumPerPosition: MutableList<Int> = MutableList(numOfPositions) {
+            0
+        }
+        input.forEach { s1 ->
+            s1.toCharArray().forEachIndexed { index, s ->
+                run {
+                    if (s.code == 49) {
+                        sumPerPosition[index]++
+                    }
                 }
             }
-        return forwardProgress * depth
+        }
+
+        val gammaRateAsString = sumPerPosition.joinToString(separator = "") {
+            if (it > reportsSize/2.0f) {
+                "1"
+            } else {
+                "0"
+            }
+        }
+
+        val gammaRate = Integer.parseInt(gammaRateAsString, 2)
+        val epsilonRateAsString = gammaRateAsString.map {
+            if (it == '0') {
+                '1'
+            } else {
+                '0'
+            }
+        }.joinToString(separator = "")
+        val epsilonRate = Integer.parseInt(epsilonRateAsString, 2)
+//        println("$epsilonRate and ${epsilonRate.times(gammaRate.toUInt()).toInt()}")
+        return gammaRate * epsilonRate
     }
 
     fun part2(input: List<String>): Int {
-//        var forwardProgress = 0
-//        var aim = 0
-//        var depth = 0
-//        input.map { it.split(" ") }
-//            .map {
-//                when (it[0]) {
-//                    "forward" -> {
-//                        forwardProgress += it[1].toInt()
-//                        depth += aim * it[1].toInt()
-//                    }
-//                    "down" -> aim += it[1].toInt()
-//                    "up" -> aim -= it[1].toInt()
-//                    else -> RuntimeException()
-//                }
-//            }
-//        return forwardProgress * depth
         return 0
     }
 
@@ -41,6 +45,6 @@ fun main() {
     check(part1(testInput) == 198)
 
     val input = readInput("Day03")
-//    println(part1(input))
+    println(part1(input))
 //    println(part2(input))
 }
