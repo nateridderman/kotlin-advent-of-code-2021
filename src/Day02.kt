@@ -17,7 +17,23 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        var forwardProgress = 0
+        var aim = 0
+        var depth = 0
+        input.map { it.split(" ") }
+            .map {
+                when (it[0]) {
+                    "forward" -> {
+                        forwardProgress += it[1].toInt()
+                        depth += aim * it[1].toInt()
+                    }
+                    "down" -> aim += it[1].toInt()
+                    "up" -> aim -= it[1].toInt()
+                    else -> RuntimeException()
+                }
+            }
+        return forwardProgress * depth
+
     }
 
     // test if implementation meets criteria from the description, like:
@@ -26,5 +42,5 @@ fun main() {
 
     val input = readInput("Day02")
     println(part1(input))
-//    println(part2(input))
+    println(part2(input))
 }
