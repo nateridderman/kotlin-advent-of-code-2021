@@ -23,21 +23,21 @@ fun main() {
         while (oxygenGenerator.size > 1) {
             val numberOfOnes = oxygenGenerator.count { it[index] == '1' }
             if (numberOfOnes >= oxygenGenerator.size - numberOfOnes) {
-                oxygenGenerator = oxygenGenerator.filter { it[index] == '1' }.toMutableList()
+                oxygenGenerator.retainAll { it[index] == '1' }
             } else {
-                oxygenGenerator = oxygenGenerator.filter { it[index] == '0' }.toMutableList()
+                oxygenGenerator.retainAll { it[index] == '0' }
             }
             index++
         }
 
-        var co2Generator = input.toMutableList()
+        val co2Generator = input.toMutableList()
         index = 0
         while (co2Generator.size > 1) {
             val numberOfOnes = co2Generator.count { it[index] == '1' }
             if (numberOfOnes < co2Generator.size - numberOfOnes) {
-                co2Generator = co2Generator.filter { it[index] == '1' }.toMutableList()
+                co2Generator.retainAll { it[index] == '1' }
             } else {
-                co2Generator = co2Generator.filter { it[index] == '0' }.toMutableList()
+                co2Generator.retainAll { it[index] == '0' }
             }
             index++
         }
