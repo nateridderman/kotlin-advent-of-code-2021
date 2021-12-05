@@ -1,29 +1,15 @@
 fun main() {
     fun part1(input: List<String>): Int {
-        val reportsSize = input.size
-        val numOfPositions = input[0].length
-        var sumPerPosition: MutableList<Int> = MutableList(numOfPositions) {
+        val sumPerPosition: MutableList<Int> = MutableList(input[0].length) {
             0
         }
-        input.forEach { s1 ->
-            s1.toCharArray().forEachIndexed { index, s ->
-                run {
-                    if (s.code == 49) {
-                        sumPerPosition[index]++
-                    }
-                }
-            }
-        }
 
-        val gammaRateAsString = sumPerPosition.joinToString(separator = "") {
-            if (it > reportsSize/2.0f) {
-                "1"
-            } else {
-                "0"
-            }
+        val gammaRateAsString = (0 until input.first().length).joinToString("") { position ->
+            input.count { it[position] == '1' }.let { if (it > input.size/2.0f) "1" else "0" }
         }
 
         val gammaRate = Integer.parseInt(gammaRateAsString, 2)
+
         val epsilonRateAsString = gammaRateAsString.map {
             if (it == '0') {
                 '1'
@@ -32,7 +18,6 @@ fun main() {
             }
         }.joinToString(separator = "")
         val epsilonRate = Integer.parseInt(epsilonRateAsString, 2)
-//        println("$epsilonRate and ${epsilonRate.times(gammaRate.toUInt()).toInt()}")
         return gammaRate * epsilonRate
     }
 
