@@ -55,8 +55,7 @@ fun main() {
                     val newValue = lineMap.getOrPut(it){0}
                     lineMap.put(it, newValue + 1)
                 }
-            } else if (kotlin.math.abs(firstPoint.first - secondPoint.first) == kotlin.math.abs(firstPoint.second - secondPoint.second)
-            ) {
+            } else if (kotlin.math.abs(firstPoint.first - secondPoint.first) == kotlin.math.abs(firstPoint.second - secondPoint.second)) {
                 //diagonal line
                 //increasing slope
                 if ((firstPoint.first - secondPoint.first) * (firstPoint.second - secondPoint.second) > 0) {
