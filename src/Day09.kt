@@ -54,7 +54,57 @@ fun main() {
             }
         }.flatten()
 
-        return 0
+        fun getValueAtPoint(x: Int, y: Int) : Int {
+            return rows[y+1][x+1]
+        }
+
+        fun anyNeighborsNotNine(point: Pair<Int, Int>) : List<Pair<Int, Int>> {
+            val result = mutableListOf<Pair<Int, Int>>()
+            val (x,y) = point
+
+            sequenceOf(-1 to 0, 1 to 0, 0 to -1, 0 to 1)
+                .map { (dx, dy) -> x + dx to y + dy }
+                .map {
+                    getValueAtPoint(it.first, it.second)
+                }
+            if (getValueAtPoint(x-1, y) < 9) {
+                result.add(Pair(x-1, y))
+            }
+            if (getValueAtPoint(x+1, y) < 9) {
+                result.add(Pair(x+1, y))
+            }
+            if (getValueAtPoint(x, y-1) < 9) {
+                result.add(Pair(x, y-1))
+            }
+            if (getValueAtPoint(x, y+1) < 9) {
+                result.add(Pair(x, y+1))
+            }
+            return result
+        }
+
+        //for each low point, recursively find new neighbors that aren't nine
+        val basinSizes = lowPoints.map {
+            val basin = mutableListOf<Pair<Int, Int>>()
+            basin.add(it)
+            var foundAnother = true
+            while (foundAnother) {
+                foundAnother = false
+                basin.firstOrNull {
+                    val newNeighbor = anyNeighborsNotNine(it).firstOrNull {
+                        !basin.contains(it)
+                    }
+                    if (newNeighbor != null) {
+                        basin.add(newNeighbor)
+                        foundAnother = true
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
+            basin.size
+        }
+        return basinSizes.sortedDescending().take(3).reduce { acc, i ->  acc * i }
     }
 
     // test if implementation meets criteria from the description, like:
@@ -63,5 +113,5 @@ fun main() {
 
     val input = readInput("Day09")
     println(part1(input))
-    println(part2(testInput))
+    println(part2(input))
 }
