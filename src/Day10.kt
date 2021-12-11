@@ -4,6 +4,12 @@ enum class PairResult {
     PAIR, NEW, INVALID
 }
 
+enum class LineResult {
+    VALID, INCOMPLETE, INVALID
+}
+
+data class ParseResult (val leftOver: Stack<Char>, val lineResult: LineResult, val lastChar: Char?)
+
 fun main() {
 
     val openOperators = listOf('[', '(', '{' ,'<')
@@ -45,14 +51,17 @@ fun main() {
         }
     }
 
-    fun parseNext2(stack: Stack<Char>, remaining: String): Stack<Char>? {
+    fun parseNext2(stack: Stack<Char>, remaining: String): ParseResult {
         return when (checkPair(if (stack.empty()) null else stack.peek(), remaining[0])) {
             PairResult.PAIR -> {
                 stack.pop()
                 if (remaining.length > 1) {
                     parseNext2(stack, remaining.substring(1))
+                }
+                else if (stack.size == 0){
+                    ParseResult(stack, LineResult.VALID, null)
                 } else {
-                    stack
+                    ParseResult(stack, LineResult.INCOMPLETE, null)
                 }
             }
             PairResult.NEW -> {
@@ -60,11 +69,11 @@ fun main() {
                 if (remaining.length > 1) {
                     parseNext2(stack, remaining.substring(1))
                 } else {
-                    stack
+                    ParseResult(stack, LineResult.INCOMPLETE, null)
                 }
             }
             PairResult.INVALID -> {
-                stack
+                ParseResult(stack, LineResult.INVALID, remaining[0])
             }
         }
     }
@@ -78,8 +87,7 @@ fun main() {
     fun parsePart2(line: String): List<Char> {
         val operatorStack = Stack<Char>()
         operatorStack.push(line.first())
-        val leftOverChars = ArrayList(parseNext2(operatorStack, line.substring(1))!!).toList()
-        //println(leftOverChars)
+        val leftOverChars = ArrayList(parseNext2(operatorStack, line.substring(1)).leftOver).toList()
         return leftOverChars
     }
 
@@ -102,10 +110,6 @@ fun main() {
             }.sum()
     }
 
-//    ): 1 point.
-//    ]: 2 points.
-//    }: 3 points.
-//    >: 4 points.
     fun charToScorePart2(input: Char) : Int {
         return when (input) {
             '(' -> 1
