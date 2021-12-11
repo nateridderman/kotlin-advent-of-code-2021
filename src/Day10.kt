@@ -25,8 +25,10 @@ fun main() {
                 stack.pop()
                 if (remaining.length > 1) {
                     parseNext(stack, remaining.substring(1))
-                } else {
+                } else if (stack.size == 0){
                     '#'
+                } else {
+                    'I'
                 }
             }
             PairResult.NEW -> {
@@ -34,8 +36,6 @@ fun main() {
                 if (remaining.length > 1) {
                     parseNext(stack, remaining.substring(1))
                 } else {
-                    //TODO not finding them all
-                    //incomplete
                     'I'
                 }
             }
@@ -60,7 +60,6 @@ fun main() {
                 if (remaining.length > 1) {
                     parseNext2(stack, remaining.substring(1))
                 } else {
-                    //incomplete
                     stack
                 }
             }
@@ -69,7 +68,6 @@ fun main() {
             }
         }
     }
-
 
     fun parsePart1(line: String): Char {
         val operatorStack = Stack<Char>()
@@ -81,7 +79,7 @@ fun main() {
         val operatorStack = Stack<Char>()
         operatorStack.push(line.first())
         val leftOverChars = ArrayList(parseNext2(operatorStack, line.substring(1))!!).toList()
-        println(leftOverChars)
+        //println(leftOverChars)
         return leftOverChars
     }
 
@@ -118,16 +116,12 @@ fun main() {
         }
     }
 
-    fun part2(input: List<String>): Int {
+    fun part2(input: List<String>): Long {
         val listOfLineScores = input.map { parsePart1(it) }
             .mapIndexedNotNull { index, it ->
                 if (it == 'I') {
                     parsePart2(input[index]).reversed()
-//                        .map {
-//                            println(it)
-//                            it
-//                        }
-                        .fold(0) {
+                        .fold(0L) {
                             acc, c -> acc * 5 + charToScorePart2(c)
                     }
                 } else {
@@ -140,7 +134,7 @@ fun main() {
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day10_test")
     check(part1(testInput) == 26397)
-    check(part2(testInput) == 288957)
+    check(part2(testInput) == 288957L)
 
     val input = readInput("Day10")
     println(part1(input))
