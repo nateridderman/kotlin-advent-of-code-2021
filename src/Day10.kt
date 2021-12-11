@@ -8,7 +8,7 @@ enum class LineResult {
     VALID, INCOMPLETE, INVALID
 }
 
-data class ParseResult (val leftOver: Stack<Char>, val lineResult: LineResult, val lastChar: Char?)
+data class ParseResult (val leftOver: Stack<Char>, val lineResult: LineResult, val firstInvalidChar: Char?)
 
 fun main() {
 
@@ -25,38 +25,12 @@ fun main() {
         }
     }
 
-    fun parseNext(stack: Stack<Char>, remaining: String): Char {
+    fun parseNext(stack: Stack<Char>, remaining: String): ParseResult {
         return when (checkPair(if (stack.empty()) null else stack.peek(), remaining[0])) {
             PairResult.PAIR -> {
                 stack.pop()
                 if (remaining.length > 1) {
                     parseNext(stack, remaining.substring(1))
-                } else if (stack.size == 0){
-                    '#'
-                } else {
-                    'I'
-                }
-            }
-            PairResult.NEW -> {
-                stack.push(remaining[0])
-                if (remaining.length > 1) {
-                    parseNext(stack, remaining.substring(1))
-                } else {
-                    'I'
-                }
-            }
-            PairResult.INVALID -> {
-                remaining[0]
-            }
-        }
-    }
-
-    fun parseNext2(stack: Stack<Char>, remaining: String): ParseResult {
-        return when (checkPair(if (stack.empty()) null else stack.peek(), remaining[0])) {
-            PairResult.PAIR -> {
-                stack.pop()
-                if (remaining.length > 1) {
-                    parseNext2(stack, remaining.substring(1))
                 }
                 else if (stack.size == 0){
                     ParseResult(stack, LineResult.VALID, null)
@@ -67,7 +41,7 @@ fun main() {
             PairResult.NEW -> {
                 stack.push(remaining[0])
                 if (remaining.length > 1) {
-                    parseNext2(stack, remaining.substring(1))
+                    parseNext(stack, remaining.substring(1))
                 } else {
                     ParseResult(stack, LineResult.INCOMPLETE, null)
                 }
@@ -78,7 +52,7 @@ fun main() {
         }
     }
 
-    fun parsePart1(line: String): Char {
+    fun parsePart1(line: String): ParseResult {
         val operatorStack = Stack<Char>()
         operatorStack.push(line.first())
         return parseNext(operatorStack, line.substring(1))
@@ -87,25 +61,23 @@ fun main() {
     fun parsePart2(line: String): List<Char> {
         val operatorStack = Stack<Char>()
         operatorStack.push(line.first())
-        val leftOverChars = ArrayList(parseNext2(operatorStack, line.substring(1)).leftOver).toList()
+        val leftOverChars = ArrayList(parseNext(operatorStack, line.substring(1)).leftOver).toList()
         return leftOverChars
     }
 
     fun part1(input: List<String>): Int {
         return input.map { parsePart1(it) }
             .map {
-                if (it == '#' || it == 'I') {
-                    0
-                } else if (it == ')') {
+                 if (it.firstInvalidChar == ')') {
                     3
-                } else if (it == ']') {
+                } else if (it.firstInvalidChar == ']') {
                     57
-                } else if (it == '}') {
+                } else if (it.firstInvalidChar == '}') {
                     1197
-                } else if (it == '>') {
+                } else if (it.firstInvalidChar == '>') {
                     25137
                 } else {
-                    -1
+                    0
                 }
             }.sum()
     }
@@ -123,7 +95,7 @@ fun main() {
     fun part2(input: List<String>): Long {
         val listOfLineScores = input.map { parsePart1(it) }
             .mapIndexedNotNull { index, it ->
-                if (it == 'I') {
+                if (it.lineResult == LineResult.INCOMPLETE) {
                     parsePart2(input[index]).reversed()
                         .fold(0L) {
                             acc, c -> acc * 5 + charToScorePart2(c)
