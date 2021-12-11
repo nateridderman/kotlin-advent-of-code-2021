@@ -1,12 +1,7 @@
 import java.util.*
 
-enum class PairResult {
-    PAIR, NEW, INVALID
-}
-
-enum class LineResult {
-    VALID, INCOMPLETE, INVALID
-}
+enum class PairResult { PAIR, NEW, INVALID }
+enum class LineResult { VALID, INCOMPLETE, INVALID }
 
 data class ParseResult (val leftOver: Stack<Char>, val lineResult: LineResult, val firstInvalidChar: Char?)
 
@@ -52,32 +47,21 @@ fun main() {
         }
     }
 
-    fun parsePart1(line: String): ParseResult {
+    fun parseLine(line: String): ParseResult {
         val operatorStack = Stack<Char>()
         operatorStack.push(line.first())
         return parseNext(operatorStack, line.substring(1))
     }
 
-    fun parsePart2(line: String): List<Char> {
-        val operatorStack = Stack<Char>()
-        operatorStack.push(line.first())
-        val leftOverChars = ArrayList(parseNext(operatorStack, line.substring(1)).leftOver).toList()
-        return leftOverChars
-    }
-
     fun part1(input: List<String>): Int {
-        return input.map { parsePart1(it) }
+        return input.map { parseLine(it) }
             .map {
-                 if (it.firstInvalidChar == ')') {
-                    3
-                } else if (it.firstInvalidChar == ']') {
-                    57
-                } else if (it.firstInvalidChar == '}') {
-                    1197
-                } else if (it.firstInvalidChar == '>') {
-                    25137
-                } else {
-                    0
+                when (it.firstInvalidChar) {
+                    ')' -> 3
+                    ']' -> 57
+                    '}' -> 1197
+                    '>' -> 25137
+                    else -> 0
                 }
             }.sum()
     }
@@ -93,10 +77,10 @@ fun main() {
     }
 
     fun part2(input: List<String>): Long {
-        val listOfLineScores = input.map { parsePart1(it) }
+        val listOfLineScores = input.map { parseLine(it) }
             .mapIndexedNotNull { index, it ->
                 if (it.lineResult == LineResult.INCOMPLETE) {
-                    parsePart2(input[index]).reversed()
+                    it.leftOver.reversed()
                         .fold(0L) {
                             acc, c -> acc * 5 + charToScorePart2(c)
                     }
