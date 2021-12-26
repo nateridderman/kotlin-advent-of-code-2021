@@ -1,66 +1,73 @@
+import java.util.*
+
 fun main() {
 
     var totalVersion = 0
 
-    fun parseLiteral(bits: MutableList<Char>): MutableList<Char> {
-        var numberDigits = String()
-        var returnList = bits
-        while (returnList.removeAt(0) == '1') {
-            numberDigits += returnList.take(4).joinToString("")
-            returnList = returnList.subList(4, returnList.size)
+    fun popChars(x: Int, bits: LinkedList<Char>): String {
+        var result = ""
+        repeat(x) {
+            result += bits.pop()
         }
-        numberDigits += returnList.take(4).joinToString("")
-        //println(numberDigits.toInt(2))
-        return returnList.subList(4, returnList.size)
+        return result
     }
 
-    fun parsePacket(origBits: MutableList<Char>): MutableList<Char> {
-        var bits = origBits
-        val version = bits.take(3).joinToString("").toInt(2)
+    fun parseLiteral(bits: LinkedList<Char>): Long {
+        var numberDigits = String()
+        while (bits.pop() == '1') {
+            numberDigits += popChars(4, bits)
+        }
+        numberDigits += popChars(4, bits)
+        return numberDigits.toLong(2)
+    }
+
+    //TODO for v2, need to pass in a mutable FIFO queue so we can pop off chars and not have to return it
+    fun parsePacket(bits: LinkedList<Char>) {
+        val version = popChars(3, bits).toInt(2)
         totalVersion += version
-        bits = bits.subList(3, bits.size)
-        val typeId = bits.take(3).joinToString("").toInt(2)
-        bits = bits.subList(3, bits.size)
+        val typeId = popChars(3, bits).toInt(2)
         if (typeId == 4) {
-            bits = parseLiteral(bits)
+            parseLiteral(bits)
         } else {
-            val lengthTypeId = bits.removeAt(0)
+            val lengthTypeId = bits.pop()
             if (lengthTypeId == '0') {
                 //then the next 15 bits are a number that represents the total length in bits of the sub-packets contained by this packet.
-                val bitsInSubPackets = bits.take(15).joinToString("").toInt(2)
-                bits = bits.subList(15, bits.size)
+                val bitsInSubPackets = popChars(15, bits).toInt(2)
                 val expectedSize = bits.size - bitsInSubPackets
                 while (bits.size > expectedSize) {
-                    //parse another character
-                    bits = parsePacket(bits)
+                    parsePacket(bits)
                 }
             } else { //eq '1'
                 //then the next 11 bits are a number that represents the number of sub-packets immediately contained by this packet.
-                val numOfSubPackets = bits.take(11).joinToString("").toInt(2)
-                bits = bits.subList(11, bits.size)
+                val numOfSubPackets = popChars(15, bits).toInt(2)
                 repeat(numOfSubPackets) {
-                    bits = parsePacket(bits)
+                    parsePacket(bits)
                 }
             }
         }
-        return bits
+        return
     }
 
     fun part1(input: List<String>): Int {
         totalVersion = 0
-        var bits = input[0].toCharArray()
+        val bits = input[0].toCharArray()
             .map { it.digitToInt(16).toString(2).padStart(4, '0')}
             .joinToString("")
-        var bitsList = mutableListOf<Char>()
+        val bitsList = LinkedList<Char>()
         bitsList.addAll(bits.toCharArray().toList())
-//        while (bitsList.isNotEmpty()) {
-            bitsList = parsePacket(bitsList)
-//        }
+        parsePacket(bitsList)
         return totalVersion
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        totalVersion = 0
+        var bits = input[0].toCharArray()
+            .map { it.digitToInt(16).toString(2).padStart(4, '0')}
+            .joinToString("")
+        var bitsList = LinkedList<Char>()
+        bitsList.addAll(bits.toCharArray().toList())
+        parsePacket(bitsList)
+        return totalVersion
     }
 
     // test if implementation meets criteria from the description, like:
@@ -71,5 +78,5 @@ fun main() {
 
     val input = readInput("Day16")
     println(part1(input))
-//    println(part2(input))
+    println(part2(input))
 }
