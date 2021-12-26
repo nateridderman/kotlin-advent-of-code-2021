@@ -39,7 +39,7 @@ fun main() {
                 }
             } else { //eq '1'
                 //then the next 11 bits are a number that represents the number of sub-packets immediately contained by this packet.
-                val numOfSubPackets = popChars(15, bits).toInt(2)
+                val numOfSubPackets = popChars(11, bits).toInt(2)
                 repeat(numOfSubPackets) {
                     parsePacket(bits)
                 }
