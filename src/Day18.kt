@@ -19,9 +19,6 @@ fun main() {
             result.right = rightResult.node
             return ParseNodeResult(rightResult.remaining.drop(1), result)
         } else if (nextChar.isDigit()) {
-//            var charsToDrop = 1
-//            if (input[1] == ',')
-//                charsToDrop = 2
             return ParseNodeResult(input.drop(1), Node(nextChar.digitToInt()))
         } else {
             TODO()
@@ -29,8 +26,17 @@ fun main() {
     }
 
     fun part1(input: List<String>): Int {
-        //TODO multiple lines
-        val Node = parseTree(input[0])
+        input.forEach {
+            val Node = parseTree(it)
+        }
+
+        //need a method to traverse the tree left to right, stopping if an action has been performed
+        //need a method to split a number
+        //need a method to explode a number (finding the next numbers to the left and right, if any)
+
+        //If any pair is nested inside four pairs, the leftmost such pair explodes.
+        //If any regular number is 10 or greater, the leftmost such regular number splits.
+
         return 0
     }
 
