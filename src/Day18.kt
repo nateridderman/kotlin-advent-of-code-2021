@@ -1,42 +1,67 @@
+
 fun main() {
-
-    data class Node (
-        var key: Int? = null,
-        var left: Node? = null,
-        var right: Node? = null )
-
-    data class ParseNodeResult (
-        val remaining: String,
-        val node: Node )
-
-    fun parseTree(input: String): ParseNodeResult {
-        val result = Node()
-        val nextChar = input.first()
-        if (nextChar == '[') {
-            val leftResult = parseTree(input.drop(1))
-            result.left = leftResult.node
-            val rightResult = parseTree(leftResult.remaining.drop(1))
-            result.right = rightResult.node
-            return ParseNodeResult(rightResult.remaining.drop(1), result)
-        } else if (nextChar.isDigit()) {
-            return ParseNodeResult(input.drop(1), Node(nextChar.digitToInt()))
-        } else {
-            TODO()
-        }
-    }
 
     fun part1(input: List<String>): Int {
         input.forEach {
-            val Node = parseTree(it)
+            println("\nfor $it")
+            var reducedSomething = true
+            var newList: String = it
+            while (reducedSomething) {
+                reducedSomething = false
+                var depth = 0
+                newList.toCharArray().forEachIndexed { i, token ->
+                    if (!reducedSomething) {
+                        if (token == '[') {
+                            depth++
+                        } else if (token == ']') {
+                            depth--
+                        } else if (token.isDigit()) {
+                            if (depth >= 5 && newList[i+1] == ',' && newList[i+2].isDigit() ) {
+
+                                val indexOfPrev = newList.substring(0, i).reversed().indexOfFirst { it.isDigit() }
+                                val indexOfNext = newList.substring(i+3).indexOfFirst { it.isDigit() }
+
+                                val first = token.digitToInt()
+                                val second = newList[i+2].digitToInt()
+
+                                newList = newList.take(i-1).plus('0').plus(
+                                    newList.substring(i+4)
+                                )
+                                var extraSwap = 0
+                                if (indexOfPrev != -1) {
+                                    val newPrev = newList[i - indexOfPrev - 1].digitToInt() + first
+                                    val result = if (newPrev > 10) {
+                                        extraSwap = 4
+                                        "[" + Math.floor(newPrev/2.0).toInt()  + "," + Math.ceil(newPrev/2.0).toInt() + "]"
+                                    } else {
+                                        newPrev.toString()
+                                    }
+                                    newList = newList.take(i - indexOfPrev - 1) + result + newList.substring(i - indexOfPrev )
+                                }
+                                if (indexOfNext != -1) {
+                                    //even this doesn't work because the index is wrong. can i fix by checking the size deltas btw the two?
+                                    val newPrev = newList[i + indexOfNext +extraSwap - 1].digitToInt() + second
+                                    val result = if (newPrev > 10) {
+                                        "[" + Math.floor(newPrev/2.0).toInt()  + "," + Math.ceil(newPrev/2.0).toInt() + "]"
+                                    } else {
+                                        newPrev.toString()
+                                    }
+                                    newList = newList.take(i + indexOfNext + extraSwap - 1) + result + newList.substring(i + indexOfNext + extraSwap)
+                                    //newList = StringBuilder(newList).also { it.setCharAt(i + indexOfNext - 1, newList[i + indexOfNext -1].plus(second)) }.toString()
+                                }
+                                reducedSomething = true
+                            }
+                        } else {
+                            //it's a comma
+                        }
+                    }
+                }
+            }
+            println("newList after reduction: $newList")
+
         }
 
-        //need a method to traverse the tree left to right, stopping if an action has been performed
-        //need a method to split a number
-        //need a method to explode a number (finding the next numbers to the left and right, if any)
-
-        //If any pair is nested inside four pairs, the leftmost such pair explodes.
         //If any regular number is 10 or greater, the leftmost such regular number splits.
-
         return 0
     }
 
@@ -52,3 +77,7 @@ fun main() {
 //    println(part1(input))
 //    println(part2(input))
 }
+
+//[[3,[2,[8,0]]],[9,[5,[7,0]]]]
+
+//[[[[0,7],4],[[7,8],[6,0]]],[8,1]]
