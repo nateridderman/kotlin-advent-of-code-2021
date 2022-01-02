@@ -8,61 +8,71 @@ fun main() {
             println("\nfor $it")
             var reducedSomething = true
             var newList = "[$acc,$it]"
+            var tokens = mutableListOf<String>()
             while (reducedSomething) {
                 reducedSomething = false
                 var depth = 0
-                newList.toCharArray().forEachIndexed { i, token ->
+                tokens.clear()
+                val iter = newList.toCharArray().toList().listIterator()
+                while (iter.hasNext()) {
+                    val nextChar = iter.next()
+                    if (tokens.isNotEmpty() && tokens.last()[0].isDigit() && nextChar.isDigit()) {
+                        tokens[tokens.size-1] = tokens.last()[0].plus(nextChar.toString())
+                    } else {
+                        tokens.add(nextChar.toString())
+                    }
+                }
+                tokens.forEachIndexed { i, token ->
                     if (!reducedSomething) {
-                        if (token == '[') {
+                        if (token == "[") {
                             depth++
-                        } else if (token == ']') {
+                        } else if (token == "]") {
                             depth--
-                        } else if (token.isDigit()) {
-                            if (depth >= 5 && newList[i+1] == ',' && newList[i+2].isDigit() ) {
-
-                                val indexOfPrev = newList.substring(0, i).reversed().indexOfFirst { it.isDigit() }
-                                val indexOfNext = newList.substring(i+3).indexOfFirst { it.isDigit() }
+                        } else if (token[0].isDigit()) {
+                            if (depth >= 5 && tokens[i+1] == "," && tokens[i+2][0].isDigit() ) {
+                                val indexOfPrev = tokens.subList(0, i).reversed().indexOfFirst { it[0].isDigit() }
+                                val indexOfNext = tokens.subList(i+3, tokens.size).indexOfFirst { it[0].isDigit() }
 
                                 val debugList = newList
-                                val first = token.digitToInt()
-                                val second = newList[i+2].digitToInt()
+                                val first = token.toInt()
+                                val second = tokens[i+2].toInt()
 
-                                newList = newList.take(i-1).plus('0').plus(
-                                    newList.substring(i+4)
-                                )
+                                tokens = tokens.take(i-1)
+                                    .plus(listOf("0"))
+                                    .plus(tokens.subList(i+4, tokens.size)).toMutableList()
 
-                                val frozenList = newList
+                                val frozenList = tokens
 
-                                var extraSwap = 0
                                 if (indexOfPrev != -1) {
-                                    val newPrev = newList[i - indexOfPrev - 1].digitToInt() + first
-                                    val result = if (newPrev >= 10) {
-                                        extraSwap = 4
-                                        val biggie = BigDecimal(newPrev)
-                                        "[" + biggie.divide(BigDecimal(2), RoundingMode.FLOOR).toInt()  + "," + biggie.divide(BigDecimal(2), RoundingMode.CEILING).toInt() + "]"
-                                    } else {
-                                        newPrev.toString()
-                                    }
-                                    newList = newList.take(i - indexOfPrev - 1) + result + newList.substring(i - indexOfPrev )
+                                    val newPrev = tokens[i - indexOfPrev - 1].toInt() + first
+                                    tokens = tokens.take(i - indexOfPrev - 1).plus(listOf(newPrev.toString())).plus(tokens.subList(i - indexOfPrev, tokens.size )).toMutableList()
                                 }
                                 if (indexOfNext != -1) {
-                                    val newNext = frozenList[i + indexOfNext - 1].digitToInt() + second
-                                    val result = if (newNext >= 10) {
-                                        val biggie = BigDecimal(newNext)
-                                        "[" + biggie.divide(BigDecimal(2), RoundingMode.FLOOR).toInt()  + "," + biggie.divide(BigDecimal(2), RoundingMode.CEILING).toInt() + "]"
-                                    } else {
-                                        newNext.toString()
-                                    }
-                                    newList = newList.take(i + indexOfNext + extraSwap - 1) + result + newList.substring(i + indexOfNext + extraSwap)
+                                    val newNext = frozenList[i + indexOfNext - 1].toInt() + second
+                                    tokens = tokens.take(i + indexOfNext - 1).plus(mutableListOf(newNext.toString())).plus(tokens.subList(i + indexOfNext, tokens.size)).toMutableList()
                                 }
+                                reducedSomething = true
+                                println(newList)
+                            } else if (token.toInt() >= 10) {
+                                val biggie = BigDecimal(token)
+                                val a = biggie.divide(BigDecimal(2), RoundingMode.FLOOR).toInt()
+                                val b = biggie.divide(BigDecimal(2), RoundingMode.CEILING).toInt()
+
+                                tokens = tokens.take(i)
+                                    .plus(listOf("[", a.toString(), ",", b.toString(), "]"))
+                                    .plus(tokens.subList(i+1, tokens.size))
+                                    .toMutableList()
                                 reducedSomething = true
                                 println(newList)
                             }
                         } else {
-                            check(token == ',')
+                            check(token == ",")
                             //it's a comma
                         }
                     }
+                }
+                if (reducedSomething) {
+                    newList = tokens.joinToString("")
                 }
             }
             println("newList after reduction: $newList")
