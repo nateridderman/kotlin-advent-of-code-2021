@@ -3,25 +3,14 @@ import java.math.RoundingMode
 
 fun main() {
 
-    fun part1(input: List<String>): String {
-        val result = input.reduce { acc, it ->
-            println("\nfor $it")
+    fun part1(input: List<String>): Int {
+        val tokenInputs = input.map { it.toCharArray().map { it.toString() } }
+        val finalTokens = tokenInputs.reduce { acc, it ->
             var reducedSomething = true
-            var newList = "[$acc,$it]"
-            var tokens = mutableListOf<String>()
+            var tokens = listOf("[").plus(acc).plus(listOf(",")).plus(it).plus(listOf("]")).toMutableList()
             while (reducedSomething) {
                 reducedSomething = false
                 var depth = 0
-                tokens.clear()
-                val iter = newList.toCharArray().toList().listIterator()
-                while (iter.hasNext()) {
-                    val nextChar = iter.next()
-                    if (tokens.isNotEmpty() && tokens.last()[0].isDigit() && nextChar.isDigit()) {
-                        tokens[tokens.size-1] = tokens.last()[0].plus(nextChar.toString())
-                    } else {
-                        tokens.add(nextChar.toString())
-                    }
-                }
                 tokens.forEachIndexed { i, token ->
                     if (!reducedSomething) {
                         if (token == "[") {
@@ -33,7 +22,7 @@ fun main() {
                                 val indexOfPrev = tokens.subList(0, i).reversed().indexOfFirst { it[0].isDigit() }
                                 val indexOfNext = tokens.subList(i+3, tokens.size).indexOfFirst { it[0].isDigit() }
 
-                                val debugList = newList
+                                val debugList = tokens
                                 val first = token.toInt()
                                 val second = tokens[i+2].toInt()
 
@@ -52,7 +41,7 @@ fun main() {
                                     tokens = tokens.take(i + indexOfNext - 1).plus(mutableListOf(newNext.toString())).plus(tokens.subList(i + indexOfNext, tokens.size)).toMutableList()
                                 }
                                 reducedSomething = true
-                                println(newList)
+                                println(tokens.joinToString(""))
                             } else if (token.toInt() >= 10) {
                                 val biggie = BigDecimal(token)
                                 val a = biggie.divide(BigDecimal(2), RoundingMode.FLOOR).toInt()
@@ -63,7 +52,7 @@ fun main() {
                                     .plus(tokens.subList(i+1, tokens.size))
                                     .toMutableList()
                                 reducedSomething = true
-                                println(newList)
+                                println(tokens.joinToString(""))
                             }
                         } else {
                             check(token == ",")
@@ -72,16 +61,16 @@ fun main() {
                     }
                 }
                 if (reducedSomething) {
-                    newList = tokens.joinToString("")
+                    //todo what?
                 }
             }
-            println("newList after reduction: $newList")
-            newList
+            println("newList after reduction: ${tokens.joinToString("")}")
+            tokens
         }
 
-        println(result)
-        //If any regular number is 10 or greater, the leftmost such regular number splits.
-        return result
+        println(finalTokens.joinToString(""))
+        //TODO magnitude
+        return 0
     }
 
     fun part2(input: List<String>): Int {
@@ -90,7 +79,7 @@ fun main() {
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day18_test3")
-    check(part1(testInput) == "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]")
+    check(part1(testInput) == 0)
 
     val input = readInput("Day18")
 //    println(part1(input))
