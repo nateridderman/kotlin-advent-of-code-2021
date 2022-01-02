@@ -40,7 +40,7 @@ fun main() {
                                 tokens = tokens.take(i + indexOfNext - 1).plus(mutableListOf(newNext.toString())).plus(tokens.subList(i + indexOfNext, tokens.size)).toMutableList()
                             }
                             reducedSomething = true
-                            println(tokens.joinToString(""))
+                            //println(tokens.joinToString(""))
                         }
                     }
                 }
@@ -61,21 +61,34 @@ fun main() {
                                 .plus(tokens.subList(i+1, tokens.size))
                                 .toMutableList()
                             reducedSomething = true
-                            println(tokens.joinToString(""))
+                            //println(tokens.joinToString(""))
                         }
                     }
                 }
-                if (reducedSomething) {
-                    //todo what?
-                }
             }
-            println("newList after reduction: ${tokens.joinToString("")}")
+            //println(tokens.joinToString(""))
             tokens
         }
 
-        println(finalTokens.joinToString(""))
-        //TODO magnitude
-        return 0
+        var tokenReduction = finalTokens.toMutableList()
+        var reducedSomething = true
+        while (reducedSomething) {
+            reducedSomething = false
+            val toReplace = tokenReduction.withIndex().windowed(3)
+                .firstOrNull {
+                    //println(it.toString())
+                    it[0].value[0].isDigit() && it[1].value[0] == ',' && it[2].value[0].isDigit()
+                }
+            toReplace?.let {
+                reducedSomething = true
+                val replaceWith = 3 * it[0].value.toInt() + 2 * it[2].value.toInt()
+                tokenReduction = tokenReduction.take(it[0].index-1).plus(replaceWith.toString()).plus(tokenReduction.subList(it[2].index+2, tokenReduction.size)).toMutableList()
+            }
+        }
+
+        var finalResultString = finalTokens.joinToString("")
+        println(finalResultString)
+        return tokenReduction[0].toInt()
     }
 
     fun part2(input: List<String>): Int {
@@ -83,21 +96,13 @@ fun main() {
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day18_test3")
-    check(part1(testInput) == 0)
+    var testInput = readInput("Day18_test2")
+    check(part1(testInput) == 3488)
+    testInput = readInput("Day18_test5")
+    check(part1(testInput) == 4140)
 
     val input = readInput("Day18")
-//    println(part1(input))
-//    println(part2(input))
+    println(part1(input))
+    println(part2(input))
 }
 
-//[[3,[2,[8,0]]],[9,[5,[7,0]]]]
-
-//[[[[0,7],4],[[7,8],[6,0]]],[8,1]]
-
-//[[[[4,0],[5,4]],[[7,7],[6,0]]],[[[6,6],[0,5]],[[5,[6,6]],[0,[7,[7,8]]]]]]
-
-
-//[[[[4,0],[5,4]],[[7,7],[6,0]]],[[[6,6],[5,5]],[[0,6],[[6,7],0]]]]
-//turned into
-//[[[[4,0],[5,4]],[[7,7],[6,0]]],[[[6,6],[5,5]],[[0,[6,6]],[0,7]]]]
