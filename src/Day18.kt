@@ -2,6 +2,7 @@ import java.awt.SystemColor.window
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+@OptIn(ExperimentalStdlibApi::class)
 fun main() {
 
     fun part1(input: List<String>): Int {
@@ -93,13 +94,23 @@ fun main() {
 
     fun part2(input: List<String>): Int {
         val tokenInputs = input.map { it.toCharArray().map { it.toString() } }
-        val tokenPairs = tokenInputs.flatMapIndexed { index, row ->
-            val listOfPairs = mutableListOf<Pair<List<String>, List<String>>>()
-            for (i in 0..tokenInputs.size-1) {
-                listOfPairs.add(Pair(row, tokenInputs[i]))
-            }
-            listOfPairs
+        //wrong but I got lucky, see commented code below
+        val tokenPairs = buildList {
+            for (i in 1 until tokenInputs.size) for (j in 0 until i-1)
+                add(Pair(tokenInputs[i], tokenInputs[j]))
         }
+
+        //Roman's
+//        buildList {
+//            for (i in a.indices) for (j in a.indices) if (i != j)
+//                add(add(a[i], a[j]).magnitude())
+//        }.maxOrNull()!!
+//
+        //Mine which doesn't have duplicates but is actually wrong because a,b is different than b,a
+//buildList {
+//    for (i in 1 until a.size) for (j in 0 until i-1)
+//        add(Pair(a[i], a[j]))
+//}
         val sums = tokenPairs.map { pair ->
             var reducedSomething = true
             var tokens = listOf("[").plus(pair.first).plus(listOf(",")).plus(pair.second).plus(listOf("]")).toMutableList()
